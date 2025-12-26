@@ -177,8 +177,8 @@ export class UserEntity extends Entity {
   }
 
   public async updatePassword(
-    newPassword: Password,
     currentPassword: Password,
+    newPassword: Password,
   ): Promise<void> {
     const isCurrentPasswordValid = Boolean(
       await this._passwordHash?.verify(currentPassword),
