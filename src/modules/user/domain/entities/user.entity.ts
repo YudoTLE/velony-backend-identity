@@ -3,12 +3,12 @@ import { AggregateId, Entity } from 'src/shared/domain/base.entity';
 import { StoragePath } from 'src/shared/domain/value-objects/storage-path.vo';
 import { v7 as uuidv7 } from 'uuid';
 
-import { UserAvatarPathUpdatedDomainEvent } from '../domain-events/user-avatar-path-updated.domain-event';
-import { UserCreatedDomainEvent } from '../domain-events/user-created.domain-event';
-import { UserNameUpdatedDomainEvent } from '../domain-events/user-name-updated.domain-event';
-import { UserPasswordRemovedDomainEvent } from '../domain-events/user-password-removed.domain-event';
-import { UserPasswordUpdatedDomainEvent } from '../domain-events/user-password-updated.domain-event';
-import { UserUsernameUpdatedDomainEvent } from '../domain-events/user-username-updated.domain-event';
+import { UserAvatarPathUpdatedDomainEvent } from '../events/user-avatar-path-updated.domain-event';
+import { UserCreatedDomainEvent } from '../events/user-created.domain-event';
+import { UserNameUpdatedDomainEvent } from '../events/user-name-updated.domain-event';
+import { UserPasswordRemovedDomainEvent } from '../events/user-password-removed.domain-event';
+import { UserPasswordUpdatedDomainEvent } from '../events/user-password-updated.domain-event';
+import { UserUsernameUpdatedDomainEvent } from '../events/user-username-updated.domain-event';
 import { InvalidPasswordException } from '../exceptions/invalid-password.exception';
 import { MissingAuthenticationMethodException } from '../exceptions/missing-authentication-method.exception';
 import { Email } from '../value-objects/email.vo';
