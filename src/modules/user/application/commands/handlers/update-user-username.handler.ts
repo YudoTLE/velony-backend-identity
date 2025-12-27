@@ -1,4 +1,5 @@
 import { CommandHandler, type ICommandHandler } from '@nestjs/cqrs';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { UserNotFoundException } from 'src/modules/user/domain/exceptions/user-not-found.exception';
 import { UserCommandRepository } from 'src/modules/user/domain/repositories/user.command.repository';
 import { Username } from 'src/modules/user/domain/value-objects/username.vo';
@@ -7,7 +8,10 @@ import { UpdateUserUsernameCommand } from '../update-user-username.command';
 
 @CommandHandler(UpdateUserUsernameCommand)
 export class UpdateUserUsernameHandler implements ICommandHandler<UpdateUserUsernameCommand> {
-  constructor(private readonly userCommandRepository: UserCommandRepository) {}
+  constructor(
+    private readonly userCommandRepository: UserCommandRepository,
+    private readonly eventEmitter: EventEmitter2,
+  ) {}
 
   async execute(command: UpdateUserUsernameCommand): Promise<void> {
     const user = await this.userCommandRepository.findById(
@@ -20,5 +24,11 @@ export class UpdateUserUsernameHandler implements ICommandHandler<UpdateUserUser
     user.updateUsername(Username.create(command.props.username));
 
     await this.userCommandRepository.save(user);
+
+    const domainEvents = user.getDomainEvents();
+    for (const event of domainEvents) {
+      await this.eventEmitter.emitAsync(event.constructor.name, event);
+    }
+    user.clearDomainEvents();
   }
 }

@@ -12,12 +12,12 @@ export abstract class DomainEvent {
   public constructor(aggregateId: AggregateId) {
     this.aggregateId = aggregateId;
     this.eventId = uuidv4();
-    this.occurredOn = new Date();
+    this.occurredAt = new Date();
   }
 
   public readonly aggregateId: AggregateId;
 
   public readonly eventId: DomainEventId;
 
-  public readonly occurredOn: Date;
+  public readonly occurredAt: Date;
 }

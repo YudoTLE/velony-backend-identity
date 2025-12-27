@@ -1,4 +1,5 @@
 import { CommandHandler, type ICommandHandler } from '@nestjs/cqrs';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { TokenService } from 'src/modules/auth/domain/services/token.service';
 import { AccessTokenPayload } from 'src/modules/auth/domain/value-objects/access-token-payload.vo';
 import { RefreshTokenPayload } from 'src/modules/auth/domain/value-objects/refresh-token-payload.vo';
@@ -15,6 +16,7 @@ export class RegisterLocalHandler implements ICommandHandler<RegisterLocalComman
   constructor(
     private readonly userCommandRepository: UserCommandRepository,
     private readonly tokenService: TokenService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async execute(command: RegisterLocalCommand) {
@@ -24,6 +26,12 @@ export class RegisterLocalHandler implements ICommandHandler<RegisterLocalComman
       password: Password.create(command.props.password),
     });
     await this.userCommandRepository.save(user);
+
+    const domainEvents = user.getDomainEvents();
+    for (const event of domainEvents) {
+      await this.eventEmitter.emitAsync(event.constructor.name, event);
+    }
+    user.clearDomainEvents();
 
     const accessToken = this.tokenService.generateAccessToken(
       AccessTokenPayload.create({ sub: user.id }),
