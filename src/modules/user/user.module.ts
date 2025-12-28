@@ -3,6 +3,7 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { KafkaModule } from 'src/shared/infrastructure/events/kafka.module';
 import { PassportModule } from 'src/shared/infrastructure/passport/passport.module';
 import { PgModule } from 'src/shared/infrastructure/persistence/pg/pg.module';
+import { S3Module } from 'src/shared/infrastructure/storage/s3.module';
 
 import { RemoveUserPasswordHandler } from './application/commands/handlers/remove-user-password.handler';
 import { UpdateUserAvatarPathHandler } from './application/commands/handlers/update-user-avatar-path.handler';
@@ -20,7 +21,7 @@ import { UserController } from './infrastructure/http/user.controller';
 import { PgUserCommandRepository } from './infrastructure/repositories/pg-user.command.repository';
 
 @Module({
-  imports: [CqrsModule, PgModule, KafkaModule, PassportModule],
+  imports: [CqrsModule, PgModule, KafkaModule, PassportModule, S3Module],
   controllers: [UserController],
   providers: [
     RemoveUserPasswordHandler,
