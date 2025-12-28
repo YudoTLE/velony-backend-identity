@@ -1,6 +1,6 @@
 import { ValueObject } from 'src/shared/domain/base.vo';
 
-type AccessTokenPayloadProps = {
+export type AccessTokenPayloadProps = {
   sub: string;
 };
 

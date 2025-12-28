@@ -1,10 +1,11 @@
-import { Body, Controller, Delete, Patch } from '@nestjs/common';
+import { Body, Controller, Delete, Patch, UseGuards } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { RemoveUserPasswordCommand } from 'src/modules/user/application/commands/remove-user-password.command';
 import { UpdateUserAvatarPathCommand } from 'src/modules/user/application/commands/update-user-avatar-path.command';
 import { UpdateUserNameCommand } from 'src/modules/user/application/commands/update-user-name.command';
 import { UpdateUserPasswordCommand } from 'src/modules/user/application/commands/update-user-password.command';
 import { UpdateUserUsernameCommand } from 'src/modules/user/application/commands/update-user-username.command';
+import { JwtCookieAuthGuard } from 'src/shared/infrastructure/passport/guards/jwt-cookie-auth.guard';
 
 import { User } from './decorators/user.decorator';
 import { RemoveUserPasswordDto } from './dtos/remove-user-password.dto';
@@ -14,6 +15,7 @@ import { UpdateUserPasswordDto } from './dtos/update-user-password.dto';
 import { UpdateUserUsernameDto } from './dtos/update-user-username.dto';
 
 @Controller('users')
+@UseGuards(JwtCookieAuthGuard)
 export class UserController {
   constructor(private readonly commandBus: CommandBus) {}
 
