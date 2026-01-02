@@ -15,7 +15,13 @@ import { v7 as uuidv7 } from 'uuid';
 
 import { TypedConfigService } from '@config/typed-config.service';
 
-import { PersistenceService } from '@identity-application/services/persistence.service';
+import { DomainEvent } from '@shared-kernel/libs/domain-event';
+
+import {
+  type OutboxPersistence,
+  type PersistenceService,
+} from '@identity-application/services/persistence.service';
+import { ParamsBuilder } from '@identity-infrastructure/persistence/pg/utils/pg-params-builder';
 
 export interface TransactionContext {
   client: PoolClient;
@@ -86,6 +92,69 @@ export class PgService
     } finally {
       client.release();
     }
+  }
+
+  public async saveToOutbox<TPayload>(
+    events: DomainEvent<TPayload>[],
+  ): Promise<void> {
+    if (events.length === 0) return;
+
+    const params = new ParamsBuilder();
+    const rows: string[] = [];
+
+    for (const event of events) {
+      rows.push(
+        `(
+            ${params.push(event.id)},
+            ${params.push(event.type)},
+            ${params.push(event.aggregateId)},
+            ${params.push(JSON.stringify(event.payload))}
+          )`,
+      );
+    }
+
+    await this.query(
+      `INSERT INTO outbox (event_id, event_type, aggregate_id, payload)
+         VALUES ${rows.join(', ')}`,
+      params.getParams(),
+    );
+  }
+
+  public async processOutbox<TPayload>(
+    handler: (outboxes: OutboxPersistence<TPayload>[]) => Promise<void>,
+  ): Promise<void> {
+    await this.transaction(async () => {
+      const result = await this.query<OutboxPersistence<TPayload>>(
+        `
+          SELECT
+            o.id AS "id",
+            o.event_id AS "eventId",
+            o.event_type AS "eventType",
+            o.aggregate_id AS "aggregateId",
+            o.payload AS "payload",
+            o.created_at AS "createdAt"
+          FROM outbox o
+          WHERE o.processed_at IS NULL
+          ORDER BY o.id ASC
+          LIMIT 100
+          FOR UPDATE SKIP LOCKED
+        `,
+      );
+      if (!result.rowCount) return;
+
+      await handler(result.rows);
+
+      const ids = result.rows.map((r) => r.id);
+
+      await this.query(
+        `
+          UPDATE outbox
+          SET processed_at = NOW()
+          WHERE id = ANY($1)
+        `,
+        [ids],
+      );
+    });
   }
 
   private getTransactionContext(): TransactionContext | undefined {

@@ -1,9 +1,20 @@
+import { AsyncLocalStorage } from 'async_hooks';
+
 import { Module } from '@nestjs/common';
 
-import { PgService } from '@identity-infrastructure/persistence/pg/pg.service';
+import {
+  PgService,
+  type TransactionContext,
+} from '@identity-infrastructure/persistence/pg/pg.service';
 
 @Module({
-  providers: [PgService],
+  providers: [
+    PgService,
+    {
+      provide: AsyncLocalStorage,
+      useValue: new AsyncLocalStorage<TransactionContext>(),
+    },
+  ],
   exports: [PgService],
 })
 export class PgModule {}
