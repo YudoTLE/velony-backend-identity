@@ -1,19 +1,18 @@
 import { DomainEvent } from '@shared-kernel/libs/domain-event';
 import { type AggregateId } from '@shared-kernel/libs/entity';
 
-export class UserCreatedDomainEvent extends DomainEvent {
+interface Payload {
+  name: string;
+  username: string;
+  avatarPath?: string;
+  email?: string;
+  phoneNumber?: string;
+}
+
+export class UserCreatedDomainEvent extends DomainEvent<Payload> {
   public static readonly Type = 'UserCreated';
 
-  constructor(
-    aggregateId: AggregateId,
-    public readonly props: {
-      name: string;
-      username: string;
-      avatarPath?: string;
-      email?: string;
-      phoneNumber?: string;
-    },
-  ) {
-    super(aggregateId);
+  constructor(aggregateId: AggregateId, payload: Payload) {
+    super(aggregateId, payload);
   }
 }

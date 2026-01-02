@@ -1,15 +1,14 @@
 import { DomainEvent } from '@shared-kernel/libs/domain-event';
 import { type AggregateId } from '@shared-kernel/libs/entity';
 
-export class PhoneNumberVerificationVerifiedDomainEvent extends DomainEvent {
+interface Payload {
+  verifiedAt: Date;
+}
+
+export class PhoneNumberVerificationVerifiedDomainEvent extends DomainEvent<Payload> {
   public static readonly Type = 'PhoneNumberVerificationVerified';
 
-  constructor(
-    aggregateId: AggregateId,
-    public readonly props: {
-      verifiedAt: Date;
-    },
-  ) {
-    super(aggregateId);
+  constructor(aggregateId: AggregateId, payload: Payload) {
+    super(aggregateId, payload);
   }
 }
